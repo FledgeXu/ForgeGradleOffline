@@ -57,7 +57,7 @@ jobs:
       run: |
         version=$(cat version.txt)
         t=$(date "+%Y-%m-%d-%H-%M-%S")
-        curl.exe -F "file=@windows_${version}.zip" "http://${{secrets.IP}}:5001/api/v0/add?&pin=false" > download.json
+        curl.exe -F "file=@windows_${version}.zip" "https://${{secrets.IP}}/api/v0/add?&pin=false" > download.json
         echo "::set-output name=version::${version}-${t}"
       id: upload
     - name: Create Release
@@ -136,7 +136,7 @@ jobs:
       run: |
         version=$(cat version.txt)
         t=$(date "+%Y-%m-%d-%H-%M-%S")
-        curl -F "file=@macos_${version}.zip" "http://${{secrets.IP}}:5001/api/v0/add?&pin=false" > download.json
+        curl -F "file=@macos_${version}.zip" "https://${{secrets.IP}}/api/v0/add?&pin=false" > download.json
         echo "::set-output name=version::${version}-${t}"
       id: upload
     - name: Create Release
