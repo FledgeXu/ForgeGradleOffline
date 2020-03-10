@@ -1,7 +1,7 @@
   
 name: Build
 
-on: [push] 
+on: [push, merge] 
 jobs:
   windows:
     runs-on: windows-latest
