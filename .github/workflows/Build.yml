@@ -67,7 +67,7 @@ jobs:
         import json
         with open("download.json") as f:
             temp = json.loads(f.read())
-            if temp.has_key('Type') and temp['Type']=="error":
+            if 'Type' in temp and temp['Type']=="error":
                 print(temp['Message'])
                 exit(1)
             else:
@@ -160,7 +160,7 @@ jobs:
         import json
         with open("download.json") as f:
             temp = json.loads(f.read())
-            if temp.has_key('Type') and temp['Type']=="error":
+            if 'Type' in temp and temp['Type']=="error":
                 print(temp['Message'])
                 exit(1)
             else:
