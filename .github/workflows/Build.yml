@@ -83,7 +83,7 @@ jobs:
             Hash ${{ steps.check.outputs.py }}
             [Download](https://contributionls.github.io/public-gateway-checker/?cid=${{ steps.check.outputs.py }})
         tag_name: ${{ steps.upload.outputs.version }}-windows
-        release_name: Release ${{ steps.upload.outputs.version }}
+        release_name: ${{ steps.upload.outputs.version }}
         draft: false
         prerelease: false
     - name: Upload Release Asset
@@ -94,7 +94,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
         asset_path: ./windows_${{ steps.upload.outputs.v }}.zip
-        asset_name: ./windows_${{ steps.upload.outputs.v }}.zip
+        asset_name: windows_${{ steps.upload.outputs.v }}.zip
         asset_content_type: application/zip
     - name: load Cache
       shell: bash
