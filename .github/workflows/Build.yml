@@ -58,7 +58,7 @@ jobs:
         version=$(cat version.txt)
         t=$(date "+%Y-%m-%d-%H-%M-%S")
         curl.exe -F "file=@windows_${version}.zip" "https://${{secrets.IP}}/api/v0/add?&pin=false" > download.json
-        echo "::set-output name=version::${version}-${t}"
+        echo "::set-output name=version::${t}-${version}"
       id: upload
     - name: Create Release
       id: create_release
@@ -66,7 +66,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: windows-${{ steps.upload.outputs.version }}
+        tag_name: ${{ steps.upload.outputs.version }}-windows
         release_name: Release ${{ steps.upload.outputs.version }}
         draft: false
         prerelease: false
@@ -137,7 +137,7 @@ jobs:
         version=$(cat version.txt)
         t=$(date "+%Y-%m-%d-%H-%M-%S")
         curl -F "file=@macos_${version}.zip" "https://${{secrets.IP}}/api/v0/add?&pin=false" > download.json
-        echo "::set-output name=version::${version}-${t}"
+        echo "::set-output name=version::${t}-${version}"
       id: upload
     - name: Create Release
       id: create_release
@@ -145,7 +145,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: macos-${{ steps.upload.outputs.version }}
+        tag_name: ${{ steps.upload.outputs.version }}-macos
         release_name: Release ${{ steps.upload.outputs.version }}
         draft: false
         prerelease: false
