@@ -81,7 +81,7 @@ jobs:
       with:
         body: |
             Hash ${{ steps.check.outputs.py }}
-            [Download](https://contributionls.github.io/public-gateway-checker/?cid=${{ steps.check.outputs.py }})
+            [IPFS 网络下载](https://contributionls.github.io/public-gateway-checker/?cid=${{ steps.check.outputs.py }}),请从中选择一个绿色地址下载。
         tag_name: ${{ steps.upload.outputs.version }}-windows
         release_name: ${{ steps.upload.outputs.version }}
         draft: false
