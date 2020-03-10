@@ -96,3 +96,8 @@ jobs:
         asset_path: ./windows_${{ steps.upload.outputs.v }}.zip
         asset_name: ./windows_${{ steps.upload.outputs.v }}.zip
         asset_content_type: application/zip
+    - name: load Cache
+      shell: bash
+      run: |
+          curl https://cloudflare-ipfs.com/ipfs/${{ steps.check.outputs.py }} -o tmp.zip
+          curl https://ipfs.io/ipfs/${{ steps.check.outputs.py }} -o tmp.zip
