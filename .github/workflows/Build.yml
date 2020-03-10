@@ -60,9 +60,22 @@ jobs:
         curl.exe -F "file=@windows_${version}.zip" "https://${{secrets.IP}}/api/v0/add?&pin=false" > download.json
         echo "::set-output name=version::${t}-${version}"
       id: upload
+    - name: Check error
+      shell: python
+      id: check
+      run: |
+        import json
+        with open("download.json") as f:
+            temp = json.loads(f.read())
+            if temp.has_key('Type') and temp['Type']=="error":
+                print(temp['Message'])
+                exit(1)
+            else:
+                print("::set-output name=py::{}".format(temp['Hash']))
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
+      body: Hash: ${{ steps.check.outputs.py }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -139,9 +152,22 @@ jobs:
         curl -F "file=@macos_${version}.zip" "https://${{secrets.IP}}/api/v0/add?&pin=false" > download.json
         echo "::set-output name=version::${t}-${version}"
       id: upload
+    - name: Check error
+      shell: python
+      id: check
+      run: |
+        import json
+        with open("download.json") as f:
+            temp = json.loads(f.read())
+            if temp.has_key('Type') and temp['Type']=="error":
+                print(temp['Message'])
+                exit(1)
+            else:
+                print("::set-output name=py::{}".format(temp['Hash']))
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
+      body: Hash: ${{ steps.check.outputs.py }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
