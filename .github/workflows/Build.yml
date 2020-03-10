@@ -80,6 +80,7 @@ jobs:
       with:
         body: |
             Hash ${{ steps.check.outputs.py }}
+            [Download](https://contributionls.github.io/public-gateway-checker/?cid=${{ steps.check.outputs.py }})
         tag_name: ${{ steps.upload.outputs.version }}-windows
         release_name: Release ${{ steps.upload.outputs.version }}
         draft: false
@@ -173,6 +174,7 @@ jobs:
       with:
         body: |
             Hash ${{ steps.check.outputs.py }}
+            [Download](https://contributionls.github.io/public-gateway-checker/?cid=${{ steps.check.outputs.py }})
         tag_name: ${{ steps.upload.outputs.version }}-macos
         release_name: Release ${{ steps.upload.outputs.version }}
         draft: false
