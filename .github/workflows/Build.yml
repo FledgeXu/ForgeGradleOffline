@@ -1,0 +1,161 @@
+  
+name: Build
+
+on: [push] 
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Add private Key
+      run: |
+          mkdir ~\.ssh
+          mv config ~\.ssh\config
+          echo '${{secrets.UPLOAD}}' > ~\.ssh\id_rsa
+    - name: Build with Gradle
+      run: |
+          $version = Get-Content "version.txt"
+          $version = "https://files.minecraftforge.net/maven/net/minecraftforge/forge/"+$version+"/forge-"+$version+"-mdk.zip"
+          echo $version
+          mkdir build
+          cd build
+          curl $version -o mdk.zip
+          Expand-Archive .\mdk.zip .
+          rm mdk.zip
+          echo "org.gradle.jvmargs=-Xmx5G" > gradle.properties
+          echo "org.gradle.daemon=false" >> gradle.properties
+    - name: genEclipseRuns
+      run: |
+          cd build
+          .\gradlew.bat genEclipseRuns
+    - name: genIntellijRuns
+      run: |
+          cd build
+          .\gradlew.bat genIntellijRuns
+    - name: prepareRunClient
+      run: |
+          cd build
+          .\gradlew.bat prepareRunClient
+    - name: prepareRunServer
+      run: |
+          cd build
+          .\gradlew.bat prepareRunServer
+    - name: after gradlew
+      run: |
+          $version = Get-Content "version.txt"
+          cd build
+          cp ~\.gradle gradlehome -Recurse -Force
+          cd ..
+          Compress-Archive .\build "windows_$version.zip"
+          echo "put windows_${version}.zip" >> sftp
+    - name: upload
+      shell: bash
+      run: |
+        version=$(cat version.txt)
+        t=$(date "+%Y-%m-%d-%H-%M-%S")
+        curl.exe -F "file=@windows_${version}.zip" "http://${{secrets.IP}}:5001/api/v0/add?&pin=false" > download.json
+        echo "::set-output name=version::${version}-${t}"
+      id: upload
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: windows-${{ steps.upload.outputs.version }}
+        release_name: Release ${{ steps.upload.outputs.version }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: ./download.json
+        asset_name: download.json
+        asset_content_type: application/json
+
+  macos:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Add private Key
+      run: |
+          mkdir ~/.ssh
+          touch ~/.ssh/known_hosts
+          echo '${{secrets.UPLOAD}}' > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa 97.64.19.136 >> ~/.ssh/known_hosts
+          chmod 400 ~/.ssh/known_hosts
+    - name: Build with Gradle
+      run: |
+        version=$(cat version.txt)
+        mdkurl="https://files.minecraftforge.net/maven/net/minecraftforge/forge/${version}/forge-${version}-mdk.zip"
+        mkdir -p build
+        cd build
+        wget ${mdkurl} -O mdk.zip
+        unzip mdk.zip
+        rm mdk.zip
+    - name: genIntellijRuns
+      run: |
+        cd build
+        ./gradlew genIntellijRuns
+    - name: genEclipseRuns
+      run: |
+        cd build
+        ./gradlew genEclipseRuns
+    - name: prepareRunClient
+      run: |
+        cd build
+        ./gradlew prepareRunClient
+    - name: prepareRunServer
+      run: |
+        cd build
+        ./gradlew prepareRunServer
+    - name: after gradlew
+      run: |
+        version=$(cat version.txt)
+        cd build
+        mv ~/.gradle gradlehome
+        cd ..
+        zip -r macos_${version}.zip build
+        echo "put macos_${version}.zip" >> sftp
+    - name: upload
+      run: |
+        version=$(cat version.txt)
+        t=$(date "+%Y-%m-%d-%H-%M-%S")
+        curl -F "file=@macos_${version}.zip" "http://${{secrets.IP}}:5001/api/v0/add?&pin=false" > download.json
+        echo "::set-output name=version::${version}-${t}"
+      id: upload
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: macos-${{ steps.upload.outputs.version }}
+        release_name: Release ${{ steps.upload.outputs.version }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: ./download.json
+        asset_name: download.json
+        asset_content_type: application/json
