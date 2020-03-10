@@ -75,11 +75,11 @@ jobs:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
-      body: |
-          Hash ${{ steps.check.outputs.py }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        body: |
+            Hash ${{ steps.check.outputs.py }}
         tag_name: ${{ steps.upload.outputs.version }}-windows
         release_name: Release ${{ steps.upload.outputs.version }}
         draft: false
@@ -168,11 +168,11 @@ jobs:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
-      body: |
-          Hash ${{ steps.check.outputs.py }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        body: |
+            Hash ${{ steps.check.outputs.py }}
         tag_name: ${{ steps.upload.outputs.version }}-macos
         release_name: Release ${{ steps.upload.outputs.version }}
         draft: false
