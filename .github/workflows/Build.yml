@@ -58,7 +58,8 @@ jobs:
         version=$(cat version.txt)
         t=$(date "+%Y-%m-%d-%H-%M-%S")
         curl.exe -F "file=@windows_${version}.zip" "https://${{secrets.IP}}/api/v0/add?&pin=false" > download.json
-        echo "::set-output name=version::${t}-${version}"
+        echo "::set-output name=version::${version}-${t}"
+        echo "::set-output name=v::${version}"
       id: upload
     - name: Check error
       shell: python
@@ -85,87 +86,13 @@ jobs:
         release_name: Release ${{ steps.upload.outputs.version }}
         draft: false
         prerelease: false
-
-  macos:
-
-    runs-on: macos-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Add private Key
-      run: |
-          mkdir ~/.ssh
-          touch ~/.ssh/known_hosts
-          echo '${{secrets.UPLOAD}}' > ~/.ssh/id_rsa
-          chmod 400 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa 97.64.19.136 >> ~/.ssh/known_hosts
-          chmod 400 ~/.ssh/known_hosts
-    - name: Build with Gradle
-      run: |
-        version=$(cat version.txt)
-        mdkurl="https://files.minecraftforge.net/maven/net/minecraftforge/forge/${version}/forge-${version}-mdk.zip"
-        mkdir -p build
-        cd build
-        wget ${mdkurl} -O mdk.zip
-        unzip mdk.zip
-        rm mdk.zip
-    - name: genIntellijRuns
-      run: |
-        cd build
-        ./gradlew genIntellijRuns
-    - name: genEclipseRuns
-      run: |
-        cd build
-        ./gradlew genEclipseRuns
-    - name: prepareRunClient
-      run: |
-        cd build
-        ./gradlew prepareRunClient
-    - name: prepareRunServer
-      run: |
-        cd build
-        ./gradlew prepareRunServer
-    - name: after gradlew
-      run: |
-        version=$(cat version.txt)
-        cd build
-        mv ~/.gradle gradlehome
-        cd ..
-        zip -r macos_${version}.zip build
-        echo "put macos_${version}.zip" >> sftp
-    - name: upload
-      run: |
-        version=$(cat version.txt)
-        t=$(date "+%Y-%m-%d-%H-%M-%S")
-        curl -F "file=@macos_${version}.zip" "https://${{secrets.IP}}/api/v0/add?&pin=false" > download.json
-        echo "::set-output name=version::${t}-${version}"
-      id: upload
-    - name: Check error
-      shell: python
-      id: check
-      run: |
-        import json
-        with open("download.json") as f:
-            temp = json.loads(f.read())
-            if 'Type' in temp and temp['Type']=="error":
-                print(temp['Message'])
-                exit(1)
-            else:
-                print("::set-output name=py::{}".format(temp['Hash']))
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        body: |
-            Hash ${{ steps.check.outputs.py }}
-            [Download](https://contributionls.github.io/public-gateway-checker/?cid=${{ steps.check.outputs.py }})
-        tag_name: ${{ steps.upload.outputs.version }}-macos
-        release_name: Release ${{ steps.upload.outputs.version }}
-        draft: false
-        prerelease: false
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: ./windows_${{ steps.upload.outputs.v }}.zip
+        asset_name: ./windows_${{ steps.upload.outputs.v }}.zip
+        asset_content_type: application/zip
