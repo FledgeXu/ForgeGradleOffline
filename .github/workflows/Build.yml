@@ -2,7 +2,8 @@
 name: Build
 
 on: 
-  branches:
+  push:
+    branches:
       - 1.12
 jobs:
   windows:
