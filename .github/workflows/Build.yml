@@ -1,7 +1,9 @@
   
 name: Build
 
-on: [push] 
+on: 
+  branches:
+      - 1.12
 jobs:
   windows:
     runs-on: windows-latest
@@ -28,22 +30,18 @@ jobs:
           rm mdk.zip
           echo "org.gradle.jvmargs=-Xmx5G" > gradle.properties
           echo "org.gradle.daemon=false" >> gradle.properties
-    - name: genEclipseRuns
+    - name: setupDecompWorkspace
       run: |
           cd build
-          .\gradlew.bat genEclipseRuns
+          .\gradlew.bat setupDecompWorkspace
+    - name: genEclipsejRuns
+      run: |
+          cd build
+          .\gradlew.bat eclipse
     - name: genIntellijRuns
       run: |
           cd build
           .\gradlew.bat genIntellijRuns
-    - name: prepareRunClient
-      run: |
-          cd build
-          .\gradlew.bat prepareRunClient
-    - name: prepareRunServer
-      run: |
-          cd build
-          .\gradlew.bat prepareRunServer
     - name: after gradlew
       run: |
           $version = Get-Content "version.txt"
