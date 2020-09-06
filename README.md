@@ -1,4 +1,3 @@
 # ForgeGradleOffline
 
-[测试链接](https://contributionls.github.io/public-gateway-checker/?cid=QmYAYjoyWhXvgDpAUgBt6HpWQvdLnT4zkiDtE6DFV9WXdD)
-
+本项目已被存档，请使用[ForgeGradleCN](https://github.com/FledgeXu/ForgeGradleCN)。
